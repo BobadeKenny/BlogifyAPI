@@ -1,0 +1,26 @@
+services:
+  postgres:
+    restart: always
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=blogify-db
+    volumes:
+      - /var/lib/postgresql
+    expose:
+      - "5432"
+  web:
+    build: .
+    ports:
+      - 8080:8080
+    volumes:
+      - ./:/blogifyapi/
+    environment:
+      - DBHOST=postgres
+    expose:
+      - "8080"
+    depends_on:
+      - postgres
+
+
