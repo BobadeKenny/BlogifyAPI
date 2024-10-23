@@ -4,10 +4,10 @@ import (
 	// "database"
 	"encoding/json"
 	"fmt"
-	"net/http"
-
 	"github.com/BobadeKenny/BlogifyAPI/database"
 	"github.com/gin-gonic/gin"
+	"net/http"
+	"time"
 )
 
 func main() {
@@ -24,26 +24,29 @@ func main() {
 }
 
 type Post struct {
-	Title   string
-	Slug    string
-	Content string
+	Title     string
+	Slug      string
+	Content   string
+	CreatedAt time.Time `gorm:"autoCreateTime"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime:milli"`
 }
 
 func addPost(ctx *gin.Context) {
 	body := Post{}
 	data, err := ctx.GetRawData()
 	if err != nil {
-		ctx.AbortWithStatusJSON(400, err)
+		ctx.AbortWithStatusJSON(400, "Error 1 {err}")
 		return
 	}
 	err = json.Unmarshal(data, &body)
 	if err != nil {
 		ctx.AbortWithStatusJSON(400, "Bad Input")
 	}
-	_, err = database.Db.Exec("insert into posts(title, slug, content) values ($1,$2,$3)", body.Title, body.Slug, body.Content)
-	if err != nil {
+	post := Post{Title: body.Title, Slug: body.Slug, Content: body.Content}
+	result := database.Db.Create(&post)
+	if result.Error != nil {
 		fmt.Println(err)
-		ctx.AbortWithStatusJSON(400, "Couldn't create post.")
+		ctx.AbortWithStatusJSON(400, err)
 	} else {
 		ctx.JSON(http.StatusOK, "Post is successfully created.")
 	}
