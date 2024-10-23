@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var Db *sql.DB
+var Db *gorm.DB
 
 func ConnectDatabase() {
 	err := godotenv.Load()
